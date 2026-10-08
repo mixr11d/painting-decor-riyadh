@@ -1,0 +1,31 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# كاش سنة كاملة لجميع ملفات الصور لضمان سرعة قصوى
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# صورة المعاينة والأيقونات
+/preview.png
+  Cache-Control: public, max-age=2592000
+
+# ملفات التصميم والبرمجة
+/style.css
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/script.js
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# ملفات السيو والبيانات
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+/llms.txt
+  Cache-Control: public, max-age=86400
