@@ -1,14 +1,14 @@
 /**
- * دهانات وديكورات وترميم الرياض - المعمارية البرمجية المركزية
- * Central Script: Google Ads Tracking, Lightbox Modal, Mobile Drawer, Lead Handling
- * 100% Vanilla JS - Zero External Dependencies
+ * دهانات وديكورات وترميم الرياض - المعمارية البرمجية المركزية الشاملة
+ * Universal Multi-Page Google Ads Tracking & UI Engine
+ * 100% Vanilla JS - يعمل على كافة الصفحات بدقة متناهية
  */
 
 (function () {
   'use strict';
 
   // ==========================================================================
-  // 1. ثوابت وبيانات النظام والتتبع المركزي (Configuration & Credentials)
+  // 1. بيانات النظام والتتبع المعتمدة لإعلانات قوقل (Live Credentials)
   // ==========================================================================
   const CONFIG = {
     conversionId: 'AW-18409997651',
@@ -17,7 +17,7 @@
     formLabel: 'GIOjCPekyJcdENOKycpE',
     clientPhoneLocal: '0552633864',
     clientPhoneIntl: '966552633864',
-    developerPhones: ['0578539687', '966578539687', '+966578539687'],
+    developerPhones: ['0578539687', '966578539687'],
     defaultFallbackImage: '/preview.png'
   };
 
@@ -33,122 +33,165 @@
   }
 
   // ==========================================================================
-  // 3. حقن كود قوقل ديناميكياً ودعم صيغة AW-ID/Label الرسمية
+  // 3. تهيئة Google Tag مركزياً لكافة الصفحات (Universal Google Tag Init)
   // ==========================================================================
-  function initGoogleTag() {
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      window.dataLayer.push(arguments);
-    }
-    window.gtag = gtag;
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    window.dataLayer.push(arguments);
+  }
+  window.gtag = gtag;
 
-    gtag('js', new Date());
-    gtag('config', CONFIG.conversionId);
+  gtag('js', new Date());
+  gtag('config', CONFIG.conversionId, {
+    page_path: window.location.pathname,
+    send_page_view: true
+  });
 
-    // حقن السكربت الخارجي لقوقل برمجياً بدون وضعه في HTML
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(CONFIG.conversionId);
-    document.head.appendChild(script);
+  // حقن سكربت قوقل في رأس الصفحة تلقائياً إن لم يكن موجوداً
+  if (!document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+    const gtagScript = document.createElement('script');
+    gtagScript.async = true;
+    gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(CONFIG.conversionId);
+    document.head.appendChild(gtagScript);
   }
 
-  initGoogleTag();
+  // ==========================================================================
+  // 4. المحرك المركزي لتسجيل الإحالات بقوة Beacon (Universal Event Dispatcher)
+  // ==========================================================================
+  function trackConversion(label, actionType) {
+    if (!label || !CONFIG.conversionId) return;
 
-  // دالة موحدة لتسجيل الإحالات
-  function sendGoogleAdsConversion(label, callback) {
-    if (typeof window.gtag === 'function' && CONFIG.conversionId && label) {
-      const sendToValue = CONFIG.conversionId + '/' + label;
-      let callbackFired = false;
+    const target = CONFIG.conversionId + '/' + label;
 
-      const triggerCallback = function () {
-        if (!callbackFired && typeof callback === 'function') {
-          callbackFired = true;
-          callback();
-        }
-      };
-
-      // مهلة أمان قصيرة لمنع تعطيل تنقل المستخدم إذا تأخرت الاستجابة
-      const timeoutId = setTimeout(triggerCallback, 600);
-
+    // 1. إرسال الإحالة الرسمية لقوقل مع Beacon لضمان عدم فقدان الإشارة عند انتقال المتصفح
+    if (typeof window.gtag === 'function') {
       window.gtag('event', 'conversion', {
-        send_to: sendToValue,
-        event_callback: function () {
-          clearTimeout(timeoutId);
-          triggerCallback();
-        }
+        send_to: target,
+        transport_type: 'beacon',
+        event_category: 'Leads',
+        event_label: actionType || 'User Action',
+        page_location: window.location.href,
+        page_path: window.location.pathname,
+        value: 1.0,
+        currency: 'SAR'
       });
-    } else {
-      if (typeof callback === 'function') callback();
     }
+
+    // 2. تسجيل الحدث في dataLayer لمزامنة أداة Tag Assistant Troubleshoot
+    window.dataLayer.push({
+      event: 'ads_conversion',
+      conversion_action: actionType,
+      conversion_target: target,
+      page: window.location.pathname
+    });
+
+    console.log(`🎯 [Google Ads Conversion] تم تسجيل إحالة (${actionType}) بنجاح إلى: ${target} في الصفحة: ${window.location.pathname}`);
   }
 
-  // التحقق هل الرابط خاص برقم المطور لاستثنائه لحماية الميزانية
-  function isDeveloperContact(targetUrl) {
-    if (!targetUrl) return false;
-    const clean = targetUrl.replace(/[^0-9]/g, '');
-    return CONFIG.developerPhones.some(function (devPhone) {
-      const cleanDev = devPhone.replace(/[^0-9]/g, '');
-      return clean.includes(cleanDev);
+  // فحص استثناء رقم المطور لحماية ميزانية الإعلانات
+  function isDeveloperLink(url) {
+    if (!url) return false;
+    const cleanStr = url.replace(/[^0-9]/g, '');
+    return CONFIG.developerPhones.some(function (dev) {
+      return cleanStr.indexOf(dev.replace(/[^0-9]/g, '')) !== -1;
     });
   }
 
-  // التحقق هل الجهاز حاسوب مكتبي
-  function isDesktopDevice() {
-    return !/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  }
-
   // ==========================================================================
-  // 4. الرصد المركزي لنقرات الاتصال والواتساب (Capture Phase Listener)
+  // 5. الرصد المركزي لكافة نقرات الاتصال والواتساب عبر كل الصفحات
   // ==========================================================================
-  document.addEventListener('click', function (event) {
-    const link = event.target.closest('a');
-    if (!link) return;
+  document.addEventListener('click', function (e) {
+    const targetLink = e.target.closest('a');
+    if (!targetLink) return;
 
-    const href = link.getAttribute('href') || '';
+    const hrefAttr = targetLink.getAttribute('href') || targetLink.href || '';
 
-    // نقرات الاتصال المباشر tel:
-    if (href.startsWith('tel:')) {
-      if (isDeveloperContact(href)) {
-        return; // استثناء رقم المطور
-      }
+    // أ) رصد نقرات الاتصال الهاتفي tel: في أي صفحة
+    if (hrefAttr.indexOf('tel:') === 0) {
+      if (isDeveloperLink(hrefAttr)) return;
 
-      // إلغاء الحدث الافتراضي على الحاسوب لمنع تجميد شاشة فحص Tag Assistant
-      if (isDesktopDevice()) {
-        event.preventDefault();
-        sendGoogleAdsConversion(CONFIG.callLabel, function () {
-          alert('رقم الاتصال المباشر لخدمة عملاء الرياض: ' + CONFIG.clientPhoneLocal);
-        });
-        return;
-      }
-
-      // على الجوال: تسجيل الإحالة ثم فتح تطبيق الاتصال
-      event.preventDefault();
-      sendGoogleAdsConversion(CONFIG.callLabel, function () {
-        window.location.href = href;
-      });
+      trackConversion(CONFIG.callLabel, 'Phone Call Click');
       return;
     }
 
-    // نقرات الواتساب wa.me أو api.whatsapp
-    if (href.includes('wa.me') || href.includes('whatsapp.com')) {
-      if (isDeveloperContact(href)) {
-        return; // استثناء رقم المطور
-      }
+    // ب) رصد نقرات الواتساب wa.me أو whatsapp.com في أي صفحة
+    if (hrefAttr.indexOf('wa.me') !== -1 || hrefAttr.indexOf('whatsapp.com') !== -1) {
+      if (isDeveloperLink(hrefAttr)) return;
 
-      event.preventDefault();
-      sendGoogleAdsConversion(CONFIG.whatsAppLabel, function () {
-        window.open(href, '_blank', 'noopener,noreferrer');
-      });
+      trackConversion(CONFIG.whatsAppLabel, 'WhatsApp Chat Click');
     }
-  }, true);
+  }, true); // استخدام capture phase لضمان التقاط الحدث قبل أي سكربت آخر
 
   // ==========================================================================
-  // 5. محرك عارض الصور المنبثق المدمج (Vanilla Lightbox Modal)
+  // 6. رصد تلقائي لصفحة الشكر عند الوصول إليها (Thank You Page Conversion)
   // ==========================================================================
-  function setupLightboxModal() {
+  if (window.location.pathname.indexOf('thank-you') !== -1) {
+    trackConversion(CONFIG.formLabel, 'Thank You Page Visit');
+  }
+
+  // ==========================================================================
+  // 7. معالجة وتتبع نماذج الطلب التفاعلية (.ajax-lead-form) في كل الصفحات
+  // ==========================================================================
+  function setupForms() {
+    const forms = document.querySelectorAll('.ajax-lead-form');
+    forms.forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const submitBtn = form.querySelector('.form-btn-submit');
+        const statusBox = form.querySelector('.form-status');
+        const nameInput = form.querySelector('[name="name"]');
+        const phoneInput = form.querySelector('[name="phone"]');
+        const serviceInput = form.querySelector('[name="service"]');
+        const districtInput = form.querySelector('[name="district"]');
+        const notesInput = form.querySelector('[name="notes"]');
+
+        const name = nameInput ? nameInput.value.trim() : 'غير محدد';
+        const phone = phoneInput ? phoneInput.value.trim() : 'غير محدد';
+        const service = serviceInput ? serviceInput.value.trim() : 'طلب تشطيب';
+        const district = districtInput ? districtInput.value.trim() : 'مدينة الرياض';
+        const notes = notesInput ? notesInput.value.trim() : 'لا يوجد';
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = 'جاري تسجيل الطلب وتحويلك...';
+        }
+
+        // إطلاق إحالة النموذج في قوقل
+        trackConversion(CONFIG.formLabel, 'Lead Form Submitted');
+
+        // تجهيز نص رسالة الواتساب
+        const message = [
+          'السلام عليكم ورحمة الله، أود طلب معاينة وتسعير عبر الموقع الإلكتروني:',
+          '• الاسم: ' + name,
+          '• الجوال: ' + phone,
+          '• الخدمة المطلوبة: ' + service,
+          '• الحي / المنطقة: ' + district,
+          '• تفاصيل إضافية: ' + notes,
+          '• رابط الصفحة: ' + window.location.href
+        ].join('\n');
+
+        const whatsappTargetUrl = 'https://wa.me/' + CONFIG.clientPhoneIntl + '?text=' + encodeURIComponent(message);
+
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.style.color = '#34d399';
+          statusBox.textContent = 'تم تسجيل طلبك بنجاح! جاري فتح محادثة الواتساب...';
+        }
+
+        setTimeout(function () {
+          window.location.href = whatsappTargetUrl;
+        }, 400);
+      });
+    });
+  }
+
+  // ==========================================================================
+  // 8. محرك عارض الصور المنبثق المدمج (Vanilla Lightbox Modal)
+  // ==========================================================================
+  function setupLightbox() {
     let modal = document.querySelector('.lightbox-modal');
 
-    // إنشاء عناصر النافذة إن لم تكن موجودة
     if (!modal) {
       modal = document.createElement('div');
       modal.className = 'lightbox-modal';
@@ -193,7 +236,6 @@
       }
     });
 
-    // تفعيل التكبير على جميع الصور القابلة للنقر في الخدمات والمعارض
     document.addEventListener('click', function (e) {
       const imgTarget = e.target.closest('.service-card-img, .gallery-thumb, [data-lightbox="true"]');
       if (imgTarget && imgTarget.tagName === 'IMG') {
@@ -206,9 +248,9 @@
   }
 
   // ==========================================================================
-  // 6. القائمة الجانبية للجوال (Mobile Drawer)
+  // 9. القائمة الجانبية للجوال (Mobile Drawer)
   // ==========================================================================
-  function setupMobileDrawer() {
+  function setupDrawer() {
     const hamburgerBtn = document.querySelector('.hamburger-btn');
     const drawerBackdrop = document.querySelector('.drawer-backdrop');
     const mobileDrawer = document.querySelector('.mobile-drawer');
@@ -232,23 +274,21 @@
     if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
 
-    // إغلاق القائمة عند النقر على أي رابط داخلي
     mobileDrawer.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', closeDrawer);
     });
   }
 
   // ==========================================================================
-  // 7. الأسئلة الشائعة القابلة للطي (FAQ Accordion)
+  // 10. الأسئلة الشائعة القابلة للطي (FAQ Accordion)
   // ==========================================================================
-  function setupFaqAccordion() {
+  function setupAccordion() {
     const faqItems = document.querySelectorAll('.faq-item');
     faqItems.forEach(function (item) {
       const questionBtn = item.querySelector('.faq-question');
       if (!questionBtn) return;
       questionBtn.addEventListener('click', function () {
         const isActive = item.classList.contains('active');
-        // إغلاق بقية الأسئلة لسلاسة التصفح
         faqItems.forEach(function (other) {
           other.classList.remove('active');
         });
@@ -260,9 +300,9 @@
   }
 
   // ==========================================================================
-  // 8. زر الصعود للأعلى (Scroll-to-top)
+  // 11. زر الصعود للأعلى (Scroll-to-top)
   // ==========================================================================
-  function setupScrollTopBtn() {
+  function setupScrollTop() {
     const scrollBtn = document.querySelector('.scroll-top-btn');
     if (!scrollBtn) return;
 
@@ -280,71 +320,14 @@
   }
 
   // ==========================================================================
-  // 9. نموذج الطلب التفاعلي السريع (.ajax-lead-form) وتوجيهه للواتساب
-  // ==========================================================================
-  function setupLeadForms() {
-    const forms = document.querySelectorAll('.ajax-lead-form');
-    forms.forEach(function (form) {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const submitBtn = form.querySelector('.form-btn-submit');
-        const statusBox = form.querySelector('.form-status');
-        const nameInput = form.querySelector('[name="name"]');
-        const phoneInput = form.querySelector('[name="phone"]');
-        const serviceInput = form.querySelector('[name="service"]');
-        const districtInput = form.querySelector('[name="district"]');
-        const notesInput = form.querySelector('[name="notes"]');
-
-        const name = nameInput ? nameInput.value.trim() : 'غير محدد';
-        const phone = phoneInput ? phoneInput.value.trim() : 'غير محدد';
-        const service = serviceInput ? serviceInput.value.trim() : 'طلب عام';
-        const district = districtInput ? districtInput.value.trim() : 'مدينة الرياض';
-        const notes = notesInput ? notesInput.value.trim() : 'لا يوجد';
-
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.dataset.originalText = submitBtn.innerHTML;
-          submitBtn.innerHTML = 'جاري المعالجة والتحويل...';
-        }
-
-        // بناء نص الرسالة المهيئة للواتساب
-        const messageText = [
-          'السلام عليكم ورحمة الله، أود طلب معاينة وتسعير عبر الموقع الإلكتروني:',
-          '• الاسم: ' + name,
-          '• الجوال: ' + phone,
-          '• الخدمة المطلوبة: ' + service,
-          '• الحي / المنطقة: ' + district,
-          '• تفاصيل إضافية: ' + notes
-        ].join('\n');
-
-        const whatsappUrl = 'https://wa.me/' + CONFIG.clientPhoneIntl + '?text=' + encodeURIComponent(messageText);
-
-        // تسجيل إحالة الفورم بقوقل ثم توجيهه للواتساب
-        sendGoogleAdsConversion(CONFIG.formLabel, function () {
-          if (statusBox) {
-            statusBox.style.display = 'block';
-            statusBox.style.color = '#34d399';
-            statusBox.textContent = 'تم تسجيل طلبك بنجاح! جاري تحويلك لمحادثة الواتساب المباشرة...';
-          }
-
-          setTimeout(function () {
-            window.location.href = whatsappUrl;
-          }, 800);
-        });
-      });
-    });
-  }
-
-  // ==========================================================================
-  // 10. الإقلاع عند اكتمال تحميل الصفحة (DOM Ready)
+  // 12. التشغيل المركزي فور اكتمال تحميل عناصر الصفحة
   // ==========================================================================
   document.addEventListener('DOMContentLoaded', function () {
-    setupLightboxModal();
-    setupMobileDrawer();
-    setupFaqAccordion();
-    setupScrollTopBtn();
-    setupLeadForms();
+    setupLightbox();
+    setupDrawer();
+    setupAccordion();
+    setupScrollTop();
+    setupForms();
   });
 
 })();
