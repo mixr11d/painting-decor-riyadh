@@ -1,5 +1,5 @@
 /* ==========================================================================
-   1. إعدادات ومعرفات إعلانات جوجل (دهانات وديكورات وترميم الرياض)
+   1. إعدادات ومعرفات إعلانات جوجل المباشرة
    ========================================================================== */
 const G_ID = 'AW-18409997651'; 
 const C_L = 'pl5nCMzhx5cdENOKycpE';    // لابل الاتصال الهاتفي
@@ -10,20 +10,20 @@ const CLIENT_PHONE_INTL = '966552633864';
 const DEV_PHONES = ['0578539687', '966578539687'];
 
 /* ==========================================================================
-   2. تحميل كود تتبع جوجل تلقائياً بعد اكتمال هيكل الصفحة
+   2. تحميل وحقن كود قوقل فوراً في النطاق العام (بدون انتظار DOMContentLoaded)
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', function() {
-    var gScript = document.createElement('script');
-    gScript.async = true;
-    gScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + G_ID;
-    document.head.appendChild(gScript);
-});
-
-// إعدادات الـ dataLayer الافتراضية
 window.dataLayer = window.dataLayer || [];
 function gtag(){ dataLayer.push(arguments); }
 gtag('js', new Date());
 gtag('config', G_ID);
+
+// حقن سكربت قوقل فوراً في الصفحة ليتصل به Tag Assistant مباشرة
+(function() {
+    var gScript = document.createElement('script');
+    gScript.async = true;
+    gScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + G_ID;
+    (document.head || document.documentElement).appendChild(gScript);
+})();
 
 /* ==========================================================================
    3. مستشعر رصد النقرات التلقائي لإعلانات جوجل (اتصال وواتساب)
@@ -39,14 +39,14 @@ document.addEventListener('click', function(e) {
     var isDev = DEV_PHONES.some(function(p) { return cleanHref.includes(p); });
     if (isDev) return;
 
-    // رصد نقرة الاتصال الهاتفي
-    if (href.startsWith('tel:') || a.getAttribute('href')?.startsWith('tel:')) {
+    // رصد نقرة الاتصال الهاتفي (التي تفحصها في شاشتك)
+    if (href.startsWith('tel:') || (a.getAttribute('href') && a.getAttribute('href').startsWith('tel:'))) {
         gtag('event', 'conversion', {
             'send_to': G_ID + '/' + C_L,
             'value': 100.0,
             'currency': 'SAR'
         });
-        console.log('✅ Google Ads Call Conversion Tracked');
+        console.log('✅ تم تسجيل إحالة الاتصال في قوقل بنجاح');
     }
     
     // رصد نقرة الواتساب المباشرة
@@ -56,26 +56,24 @@ document.addEventListener('click', function(e) {
             'value': 80.0,
             'currency': 'SAR'
         });
-        console.log('✅ Google Ads WhatsApp Conversion Tracked');
+        console.log('✅ تم تسجيل إحالة الواتساب في قوقل بنجاح');
     }
 }, true);
 
 /* ==========================================================================
-   3.1 مستشعر رصد إرسال النماذج التفاعلية وتحويلها للواتساب
+   4. مستشعر رصد إرسال النماذج التفاعلية وتحويلها للواتساب
    ========================================================================== */
 document.addEventListener('submit', function(e) {
     var form = e.target.closest('.ajax-lead-form') || (e.target.id === 'contactForm' ? e.target : null);
     if (!form) return;
 
-    // تسجيل إحالة النموذج بقوقل
     gtag('event', 'conversion', {
         'send_to': G_ID + '/' + F_L,
         'value': 70.0,
         'currency': 'SAR'
     });
-    console.log('✅ Google Ads Form Conversion Tracked');
+    console.log('✅ تم تسجيل إحالة النموذج في قوقل بنجاح');
 
-    // تجهيز رسالة الواتساب والتحويل
     if (form.classList.contains('ajax-lead-form')) {
         e.preventDefault();
         var name = (form.querySelector('[name="name"]') || {}).value || 'غير محدد';
@@ -105,7 +103,7 @@ document.addEventListener('submit', function(e) {
     }
 });
 
-// رصد صفحة الشكر تلقائياً إن زارها العميل
+// رصد صفحة الشكر تلقائياً
 if (window.location.pathname.includes('thank-you')) {
     gtag('event', 'conversion', {
         'send_to': G_ID + '/' + F_L,
@@ -115,9 +113,10 @@ if (window.location.pathname.includes('thank-you')) {
 }
 
 /* ==========================================================================
-   4. تفعيل وإغلاق قائمة الجوال (Drawer / Mobile Menu)
+   5. تشغيل وظائف الواجهة (القائمة واللايت بوكس والأكورديون)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', function() {
+    // Mobile Drawer
     var menuToggle = document.querySelector('.hamburger-btn') || document.getElementById('menuToggle');
     var mobileDrawer = document.querySelector('.mobile-drawer');
     var drawerBackdrop = document.querySelector('.drawer-backdrop');
@@ -145,9 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    /* ==========================================================================
-       5. تشغيل عارض الصور المنبثق (Vanilla Lightbox Modal)
-       ========================================================================== */
+    // Lightbox Modal
     var modal = document.querySelector('.lightbox-modal');
     if (!modal) {
         modal = document.createElement('div');
@@ -178,9 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    /* ==========================================================================
-       6. الأسئلة الشائعة القابلة للطي (Accordion)
-       ========================================================================== */
+    // Accordion
     document.querySelectorAll('.faq-item').forEach(function(item) {
         var btn = item.querySelector('.faq-question');
         if (btn) {
@@ -190,17 +185,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    /* ==========================================================================
-       7. زر الصعود للأعلى (Back To Top)
-       ========================================================================== */
+    // Scroll To Top
     var backToTopBtn = document.querySelector('.scroll-top-btn') || document.getElementById('backToTop');
     if (backToTopBtn) {
         window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 350) {
-                backToTopBtn.classList.add('visible');
-            } else {
-                backToTopBtn.classList.remove('visible');
-            }
+            if (window.pageYOffset > 350) backToTopBtn.classList.add('visible');
+            else backToTopBtn.classList.remove('visible');
         });
         backToTopBtn.addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
