@@ -11,10 +11,10 @@
   // 1. ثوابت وبيانات النظام والتتبع المركزي (Configuration & Credentials)
   // ==========================================================================
   const CONFIG = {
-    conversionId: 'AW-XXXXXXXXXXX',
-    callLabel: 'XXXXXXXXXXXXXXXXXX',
-    whatsAppLabel: 'XXXXXXXXXXXXXXXXXX',
-    formLabel: 'XXXXXXXXXXXXXXXXXX',
+    conversionId: 'AW-18409997651',
+    callLabel: 'pl5nCMzhx5cdENOKycpE',
+    whatsAppLabel: 'n8l9CM_hx5cdENOKycpE',
+    formLabel: 'GIOjCPekyJcdENOKycpE',
     clientPhoneLocal: '0552633864',
     clientPhoneIntl: '966552633864',
     developerPhones: ['0578539687', '966578539687', '+966578539687'],
